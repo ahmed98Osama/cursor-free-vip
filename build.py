@@ -7,6 +7,18 @@ import threading
 import shutil
 from logo import print_logo
 from dotenv import load_dotenv
+from colorama import Fore, Style, init
+
+# Initialize colorama / 初始化colorama
+init()
+
+# Define emoji constants / 定义表情符号常量
+EMOJI = {
+    'SUCCESS': '(+)' if platform.system() == 'Windows' else '✅',
+    'ERROR': '(!)' if platform.system() == 'Windows' else '❌',
+    'INFO': '(i)' if platform.system() == 'Windows' else 'ℹ️',
+    'PACKAGE': '[P]' if platform.system() == 'Windows' else '📦'
+}
 
 # 忽略特定警告
 warnings.filterwarnings("ignore", category=SyntaxWarning)
@@ -95,16 +107,16 @@ def build():
         loading.stop()
 
         if os.path.exists(output_path):
-            print(f"\n\033[92m✅ 構建完成！")
-            print(f"📦 可執行文件位於: {output_path}\033[0m")
+            print(f"\n{Fore.GREEN}{EMOJI['SUCCESS']} 構建完成！{Style.RESET_ALL}")
+            print(f"{EMOJI['PACKAGE']} 可執行文件位於: {output_path}")
         else:
-            print("\n\033[91m❌ 構建失敗：未找到輸出文件\033[0m")
+            print(f"\n{Fore.RED}{EMOJI['ERROR']} 構建失敗：未找到輸出文件{Style.RESET_ALL}")
             return False
 
     except Exception as e:
         if loading:
             loading.stop()
-        print(f"\n\033[91m❌ 構建過程出錯: {str(e)}\033[0m")
+        print(f"\n{Fore.RED}{EMOJI['ERROR']} 構建過程出錯: {str(e)}{Style.RESET_ALL}")
         return False
 
     return True

@@ -1,17 +1,18 @@
 {
     "menu": {
-        "title": "可用選項",
-        "exit": "退出程序",
-        "reset": "重置機器標識",
-        "register": "註冊 Cursor",
-        "register_manual": "手動指定郵箱註冊 Cursor",
-        "quit": "退出 Cursor",
+        "title": "主選單",
+        "exit": "退出",
+        "reset": "重置機器ID",
+        "register": "註冊Cursor（自動）",
+        "register_manual": "註冊Cursor（手動）",
+        "quit": "退出Cursor",
         "select_language": "選擇語言",
-        "input_choice": "輸入選擇 ({choices})",
-        "invalid_choice": "無效選擇，請重試",
-        "program_terminated": "程序被用戶終止",
-        "error_occurred": "發生錯誤: {error}",
-        "press_enter": "按回車鍵退出"
+        "select_browser": "選擇瀏覽器",
+        "input_choice": "請輸入選項",
+        "invalid_choice": "無效選項",
+        "program_terminated": "程式已終止",
+        "error_occurred": "發生錯誤：{error}",
+        "press_enter": "按Enter鍵繼續..."
     },
     "languages": {
         "en": "English",
@@ -193,6 +194,15 @@
         "verification_code_not_found": "未找到驗證碼",
         "verification_code_error": "驗證碼錯誤: {error}",
         "address": "郵箱地址"
-    }   
-
+    },
+    "browser": {
+        "no_browsers_found": "未找到相容的瀏覽器。請安裝Chrome、Edge或Brave。",
+        "select_browser": "選擇您偏好的瀏覽器",
+        "chrome": "Google瀏覽器",
+        "edge": "微軟Edge瀏覽器",
+        "brave": "Brave瀏覽器",
+        "input_choice": "請輸入選項",
+        "invalid_choice": "無效選項",
+        "preference_saved": "瀏覽器偏好設定已儲存"
+    }
 } 

@@ -3,17 +3,18 @@ import time
 from colorama import Fore, Style, init
 import sys
 import os
+import platform
 
 # 初始化colorama
 init()
 
 # 定义emoji常量
 EMOJI = {
-    "PROCESS": "⚙️",
-    "SUCCESS": "✅",
-    "ERROR": "❌",
-    "INFO": "ℹ️",
-    "WAIT": "⏳"
+    'START': '>>' if platform.system() == 'Windows' else '🚀',
+    'SUCCESS': '(+)' if platform.system() == 'Windows' else '✅',
+    'ERROR': '(!)' if platform.system() == 'Windows' else '❌',
+    'INFO': '(i)' if platform.system() == 'Windows' else 'ℹ️',
+    'WAIT': '...' if platform.system() == 'Windows' else '⏳'
 }
 
 class CursorQuitter:
@@ -24,7 +25,7 @@ class CursorQuitter:
     def quit_cursor(self):
         """温和地关闭 Cursor 进程"""
         try:
-            print(f"{Fore.CYAN}{EMOJI['PROCESS']} {self.translator.get('quit_cursor.start')}...{Style.RESET_ALL}")
+            print(f"{Fore.CYAN}{EMOJI['START']} {self.translator.get('quit_cursor.start')}...{Style.RESET_ALL}")
             cursor_processes = []
             
             # 收集所有 Cursor 进程
@@ -43,7 +44,7 @@ class CursorQuitter:
             for proc in cursor_processes:
                 try:
                     if proc.is_running():
-                        print(f"{Fore.YELLOW}{EMOJI['PROCESS']} {self.translator.get('quit_cursor.terminating', pid=proc.pid)}...{Style.RESET_ALL}")
+                        print(f"{Fore.YELLOW}{EMOJI['START']} {self.translator.get('quit_cursor.terminating', pid=proc.pid)}...{Style.RESET_ALL}")
                         proc.terminate()
                 except (psutil.NoSuchProcess, psutil.AccessDenied):
                     continue

@@ -1,17 +1,18 @@
 {
     "menu": {
-        "title": "Available Options",
-        "exit": "Exit Program",
-        "reset": "Reset Machine Manual",
-        "register": "Register Cursor",
-        "register_manual": "Register Cursor With Manual Email",
+        "title": "Main Menu",
+        "exit": "Exit",
+        "reset": "Reset Machine ID",
+        "register": "Register Cursor (Automatic)",
+        "register_manual": "Register Cursor (Manual)",
         "quit": "Quit Cursor",
         "select_language": "Select Language",
-        "input_choice": "Enter your choice ({choices})",
-        "invalid_choice": "Invalid choice. Please try again",
-        "program_terminated": "Program terminated by user",
+        "select_browser": "Select Browser",
+        "input_choice": "Enter your choice",
+        "invalid_choice": "Invalid choice",
         "error_occurred": "An error occurred: {error}",
-        "press_enter": "Press Enter to Exit"
+        "program_terminated": "Program terminated",
+        "press_enter": "Press Enter to continue..."
     },
     "languages": {
         "en": "English",
@@ -196,5 +197,15 @@
         "verification_code_not_found": "Verification Code Not Found",
         "verification_code_error": "Verification Code Error: {error}",
         "address": "Email Address"
+    },
+    "browser": {
+        "no_browsers_found": "No compatible browsers found. Please install Chrome, Edge, or Brave.",
+        "select_browser": "Select your preferred browser",
+        "chrome": "Google Chrome",
+        "edge": "Microsoft Edge",
+        "brave": "Brave Browser",
+        "input_choice": "Enter your choice",
+        "invalid_choice": "Invalid choice",
+        "preference_saved": "Browser preference saved successfully"
     }
 }

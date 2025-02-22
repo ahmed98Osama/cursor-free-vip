@@ -16,12 +16,14 @@ init()
 
 # 定义emoji常量
 EMOJI = {
-    "FILE": "📄",
-    "BACKUP": "💾",
-    "SUCCESS": "✅",
-    "ERROR": "❌",
-    "INFO": "ℹ️",
-    "RESET": "🔄",
+    "FILE": "[F]" if platform.system() == 'Windows' else "📄",
+    "BACKUP": "[B]" if platform.system() == 'Windows' else "💾",
+    "SUCCESS": "(+)" if platform.system() == 'Windows' else "✅",
+    "ERROR": "(!)" if platform.system() == 'Windows' else "❌",
+    "INFO": "(i)" if platform.system() == 'Windows' else "ℹ️",
+    "RESET": "(^)" if platform.system() == 'Windows' else "🔄",
+    "KEY": "[K]" if platform.system() == 'Windows' else "🔑",
+    "DB": "[D]" if platform.system() == 'Windows' else "🗄️"
 }
 
 def get_cursor_paths(translator=None) -> Tuple[str, str]:

@@ -1,47 +1,124 @@
 # main.py
 # This script allows the user to choose which script to run.
+# 此脚本允许用户选择要运行的脚本。
+
 import os
 import sys
 import json
 from logo import print_logo
 from colorama import Fore, Style, init
+import platform
 
-# 初始化colorama
+# Initialize colorama / 初始化colorama
 init()
 
-# 定义emoji和颜色常量
+# Define emoji constants / 定义表情符号常量
+# Use text symbols for Windows, emojis for other systems
+# 在Windows上使用文本符号，在其他系统上使用表情符号
 EMOJI = {
-    "FILE": "📄",
-    "BACKUP": "💾",
-    "SUCCESS": "✅",
-    "ERROR": "❌",
-    "INFO": "ℹ️",
-    "RESET": "🔄",
-    "MENU": "📋",
-    "ARROW": "➜",
-    "LANG": "🌐"
+    "FILE": "[F]" if platform.system() == 'Windows' else "📄",
+    "BACKUP": "[B]" if platform.system() == 'Windows' else "💾",
+    "SUCCESS": "(+)" if platform.system() == 'Windows' else "✅",
+    "ERROR": "(!)" if platform.system() == 'Windows' else "❌",
+    "INFO": "(i)" if platform.system() == 'Windows' else "ℹ️",
+    "RESET": "(^)" if platform.system() == 'Windows' else "🔄",
+    "MENU": "[M]" if platform.system() == 'Windows' else "📋",
+    "ARROW": ">>" if platform.system() == 'Windows' else "➜",
+    "LANG": "[L]" if platform.system() == 'Windows' else "🌐",
+    "BROWSER": "[W]" if platform.system() == 'Windows' else "🌍"
 }
 
+def save_settings(settings):
+    """
+    Save settings to file
+    保存设置到文件
+    
+    Args:
+        settings (dict): Settings to save / 要保存的设置
+    """
+    try:
+        # Get the directory where the executable is located / 获取可执行文件所在目录
+        if getattr(sys, 'frozen', False):
+            # If running as executable / 如果作为可执行文件运行
+            exe_dir = os.path.dirname(sys.executable)
+        else:
+            # If running as script / 如果作为脚本运行
+            exe_dir = os.path.dirname(os.path.abspath(__file__))
+            
+        settings_path = os.path.join(exe_dir, 'settings.json')
+        with open(settings_path, 'w', encoding='utf-8') as f:
+            json.dump(settings, f, indent=4)
+    except Exception as e:
+        print(f"{Fore.RED}{EMOJI['ERROR']} Failed to save settings: {str(e)}{Style.RESET_ALL}")
+
+def load_settings():
+    """
+    Load settings from file
+    从文件加载设置
+    
+    Returns:
+        dict: Loaded settings or empty dict if failed / 加载的设置，失败返回空字典
+    """
+    try:
+        # Get the directory where the executable is located / 获取可执行文件所在目录
+        if getattr(sys, 'frozen', False):
+            # If running as executable / 如果作为可执行文件运行
+            exe_dir = os.path.dirname(sys.executable)
+        else:
+            # If running as script / 如果作为脚本运行
+            exe_dir = os.path.dirname(os.path.abspath(__file__))
+            
+        settings_path = os.path.join(exe_dir, 'settings.json')
+        if os.path.exists(settings_path):
+            with open(settings_path, 'r', encoding='utf-8') as f:
+                return json.load(f)
+    except Exception as e:
+        print(f"{Fore.RED}{EMOJI['ERROR']} Failed to load settings: {str(e)}{Style.RESET_ALL}")
+    return {}
+
 class Translator:
+    """
+    Translation handler class
+    翻译处理器类
+    """
+    
     def __init__(self):
-        self.current_language = 'zh_tw'  # 默认语言
+        """
+        Initialize translator with settings
+        使用设置初始化翻译器
+        """
+        settings = load_settings()
+        self.current_language = settings.get('language', 'zh_tw')  # Load from settings or use default / 从设置加载或使用默认值
         self.translations = {}
         self.load_translations()
     
     def load_translations(self):
-        """加载所有可用的翻译"""
+        """
+        Load all available translations
+        加载所有可用的翻译
+        """
         locales_dir = os.path.join(os.path.dirname(__file__), 'locales')
         if hasattr(sys, '_MEIPASS'):
             locales_dir = os.path.join(sys._MEIPASS, 'locales')
             
         for file in os.listdir(locales_dir):
             if file.endswith('.json'):
-                lang_code = file[:-5]  # 移除 .json
+                lang_code = file[:-5]  # Remove .json / 移除.json
                 with open(os.path.join(locales_dir, file), 'r', encoding='utf-8') as f:
                     self.translations[lang_code] = json.load(f)
     
     def get(self, key, **kwargs):
-        """获取翻译文本"""
+        """
+        Get translated text
+        获取翻译文本
+        
+        Args:
+            key (str): Translation key / 翻译键
+            **kwargs: Format arguments / 格式化参数
+            
+        Returns:
+            str: Translated text or original key if not found / 翻译文本，未找到则返回原始键
+        """
         try:
             keys = key.split('.')
             value = self.translations.get(self.current_language, {})
@@ -49,15 +126,28 @@ class Translator:
                 if isinstance(value, dict):
                     value = value.get(k, key)
                 else:
-                    return key  # 如果中間值不是字典，返回原始key
+                    return key  # Return original key if intermediate value is not a dict / 如果中间值不是字典，返回原始键
             return value.format(**kwargs) if kwargs else value
         except Exception:
-            return key  # 出現任何錯誤時返回原始key
+            return key  # Return original key on any error / 出现任何错误时返回原始键
     
     def set_language(self, lang_code):
-        """设置当前语言"""
+        """
+        Set current language
+        设置当前语言
+        
+        Args:
+            lang_code (str): Language code / 语言代码
+            
+        Returns:
+            bool: True if successful, False if language not found / 成功返回True，未找到语言返回False
+        """
         if lang_code in self.translations:
             self.current_language = lang_code
+            # Save language preference to settings / 保存语言偏好到设置
+            settings = load_settings()
+            settings['language'] = lang_code
+            save_settings(settings)
             return True
         return False
 
@@ -65,7 +155,10 @@ class Translator:
 translator = Translator()
 
 def print_menu():
-    """打印菜单选项"""
+    """
+    Print menu options
+    打印菜单选项
+    """
     print(f"\n{Fore.CYAN}{EMOJI['MENU']} {translator.get('menu.title')}:{Style.RESET_ALL}")
     print(f"{Fore.YELLOW}{'─' * 40}{Style.RESET_ALL}")
     print(f"{Fore.GREEN}0{Style.RESET_ALL}. {EMOJI['ERROR']} {translator.get('menu.exit')}")
@@ -74,10 +167,17 @@ def print_menu():
     print(f"{Fore.GREEN}3{Style.RESET_ALL}. {EMOJI['SUCCESS']} {translator.get('menu.register_manual')}")
     print(f"{Fore.GREEN}4{Style.RESET_ALL}. {EMOJI['ERROR']} {translator.get('menu.quit')}")
     print(f"{Fore.GREEN}5{Style.RESET_ALL}. {EMOJI['LANG']} {translator.get('menu.select_language')}")
+    print(f"{Fore.GREEN}6{Style.RESET_ALL}. {EMOJI['BROWSER']} {translator.get('menu.select_browser')}")
     print(f"{Fore.YELLOW}{'─' * 40}{Style.RESET_ALL}")
 
 def select_language():
-    """语言选择菜单"""
+    """
+    Language selection menu
+    语言选择菜单
+    
+    Returns:
+        bool: True if language changed successfully / 语言更改成功返回True
+    """
     print(f"\n{Fore.CYAN}{EMOJI['LANG']} {translator.get('menu.select_language')}:{Style.RESET_ALL}")
     print(f"{Fore.YELLOW}{'─' * 40}{Style.RESET_ALL}")
     
@@ -97,13 +197,29 @@ def select_language():
     print(f"{Fore.RED}{EMOJI['ERROR']} {translator.get('menu.invalid_choice')}{Style.RESET_ALL}")
     return False
 
+def select_browser():
+    """
+    Browser selection menu
+    浏览器选择菜单
+    
+    Returns:
+        bool: True if browser changed successfully / 浏览器更改成功返回True
+    """
+    from browser import BrowserManager
+    browser_manager = BrowserManager(translator=translator)
+    return browser_manager.select_browser() is not None
+
 def main():
+    """
+    Main program entry point
+    程序主入口点
+    """
     print_logo()
     print_menu()
     
     while True:
         try:
-            choice = input(f"\n{EMOJI['ARROW']} {Fore.CYAN}{translator.get('menu.input_choice', choices='0-5')}: {Style.RESET_ALL}")
+            choice = input(f"\n{EMOJI['ARROW']} {Fore.CYAN}{translator.get('menu.input_choice', choices='0-6')}: {Style.RESET_ALL}")
 
             if choice == "0":
                 print(f"\n{Fore.YELLOW}{EMOJI['INFO']} {translator.get('menu.exit')}...{Style.RESET_ALL}")
@@ -112,21 +228,25 @@ def main():
             elif choice == "1":
                 import reset_machine_manual
                 reset_machine_manual.run(translator)
-                break
+                print_menu()
             elif choice == "2":
                 import cursor_register
                 cursor_register.main(translator)
-                break
+                print_menu()
             elif choice == "3":
                 import cursor_register_manual
                 cursor_register_manual.main(translator)
-                break
+                print_menu()
             elif choice == "4":
                 import quit_cursor
                 quit_cursor.quit_cursor(translator)
-                break
+                print_menu()
             elif choice == "5":
                 if select_language():
+                    print_menu()
+                continue
+            elif choice == "6":
+                if select_browser():
                     print_menu()
                 continue
             else:
@@ -142,7 +262,7 @@ def main():
             break
 
     print(f"\n{Fore.CYAN}{'═' * 50}{Style.RESET_ALL}")
-    input(f"{EMOJI['INFO']} {translator.get('menu.press_enter')}...{Style.RESET_ALL}")
+    input(f"{EMOJI['INFO']} {translator.get('menu.press_enter')}...")
 
 if __name__ == "__main__":
     main() 

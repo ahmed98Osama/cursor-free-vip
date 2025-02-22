@@ -1,6 +1,9 @@
 import time
 import random
 import os
+import sys
+import json
+import platform
 from colorama import Fore, Style, init
 
 # 初始化colorama
@@ -8,12 +11,12 @@ init()
 
 # 定义emoji常量
 EMOJI = {
-    'MAIL': '📧',
-    'REFRESH': '🔄',
-    'SUCCESS': '✅',
-    'ERROR': '❌',
-    'INFO': 'ℹ️',
-    'CODE': '📱'
+    'MAIL': '[M]' if platform.system() == 'Windows' else '📧',
+    'REFRESH': '(^)' if platform.system() == 'Windows' else '🔄',
+    'SUCCESS': '(+)' if platform.system() == 'Windows' else '✅',
+    'ERROR': '(!)' if platform.system() == 'Windows' else '❌',
+    'INFO': '(i)' if platform.system() == 'Windows' else 'ℹ️',
+    'CODE': '[C]' if platform.system() == 'Windows' else '📱'
 }
 
 class BrowserControl:

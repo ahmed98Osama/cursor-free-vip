@@ -1,6 +1,7 @@
 import sqlite3
 import os
 import sys
+import platform
 from colorama import Fore, Style, init
 
 # 初始化colorama
@@ -8,14 +9,14 @@ init()
 
 # 定义emoji和颜色常量
 EMOJI = {
-    'DB': '🗄️',
-    'UPDATE': '🔄',
-    'SUCCESS': '✅',
-    'ERROR': '❌',
-    'WARN': '⚠️',
-    'INFO': 'ℹ️',
-    'FILE': '📄',
-    'KEY': '🔐'
+    'DB': '[D]' if platform.system() == 'Windows' else '🗄️',
+    'UPDATE': '(^)' if platform.system() == 'Windows' else '🔄',
+    'SUCCESS': '(+)' if platform.system() == 'Windows' else '✅',
+    'ERROR': '(!)' if platform.system() == 'Windows' else '❌',
+    'WARN': '(!)' if platform.system() == 'Windows' else '⚠️',
+    'INFO': '(i)' if platform.system() == 'Windows' else 'ℹ️',
+    'FILE': '[F]' if platform.system() == 'Windows' else '📄',
+    'KEY': '[K]' if platform.system() == 'Windows' else '🔐'
 }
 
 class CursorAuth:
