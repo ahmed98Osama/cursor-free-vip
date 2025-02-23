@@ -76,24 +76,11 @@ class NewTempEmail:
             else:
                 print(f"{Fore.CYAN}{EMOJI['START']} Starting browser... / 正在启动浏览器...{Style.RESET_ALL}")
             
-            # Create browser options / 创建浏览器选项
-            co = ChromiumOptions()
-            co.set_argument("--headless=new")
+            # Use BrowserManager to create headless browser / 使用BrowserManager创建无头浏览器
+            from browser import BrowserManager
+            browser_manager = BrowserManager(translator=self.translator)
+            self.page = browser_manager.create_headless_browser()
             
-            co.auto_port()  # Auto set port / 自动设置端口
-            
-            # Load uBlock extension / 加载 uBlock 插件
-            try:
-                extension_path = self.get_extension_block()
-                co.set_argument("--allow-extensions-in-incognito")
-                co.add_extension(extension_path)
-            except Exception as e:
-                if self.translator:
-                    print(f"{Fore.YELLOW}{EMOJI['ERROR']} {self.translator.get('email.extension_load_error')}: {str(e)}{Style.RESET_ALL}")
-                else:
-                    print(f"{Fore.YELLOW}{EMOJI['ERROR']} Failed to load extension / 加载插件失败: {str(e)}{Style.RESET_ALL}")
-            
-            self.page = ChromiumPage(co)
             return True
         except Exception as e:
             if self.translator:

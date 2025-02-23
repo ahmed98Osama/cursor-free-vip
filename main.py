@@ -8,6 +8,7 @@ import json
 from logo import print_logo
 from colorama import Fore, Style, init
 import platform
+import logging
 
 # Initialize colorama / 初始化colorama
 init()
@@ -27,6 +28,7 @@ EMOJI = {
     "LANG": "[L]" if platform.system() == 'Windows' else "🌐",
     "BROWSER": "[W]" if platform.system() == 'Windows' else "🌍"
 }
+logging.basicConfig(level=logging.INFO)
 
 def save_settings(settings):
     """
@@ -182,19 +184,37 @@ def select_language():
     print(f"{Fore.YELLOW}{'─' * 40}{Style.RESET_ALL}")
     
     languages = translator.get('languages')
+    current_lang = translator.current_language
+    print(f"{EMOJI['INFO']} Current language / 当前语言: {languages.get(current_lang, current_lang)}")
+    
+    # Show available languages / 显示可用语言
     for i, (code, name) in enumerate(languages.items()):
-        print(f"{Fore.GREEN}{i}{Style.RESET_ALL}. {name}")
+        # Add indicator for current language / 为当前语言添加指示符
+        current = " (current)" if code == current_lang else ""
+        print(f"{Fore.GREEN}{i}{Style.RESET_ALL}. {name}{current}")
+        logging.info(f"Language option {i}: {code} - {name}")
     
     try:
         choice = input(f"\n{EMOJI['ARROW']} {Fore.CYAN}{translator.get('menu.input_choice', choices='0-' + str(len(languages)-1))}: {Style.RESET_ALL}")
         if choice.isdigit() and 0 <= int(choice) < len(languages):
             lang_code = list(languages.keys())[int(choice)]
-            translator.set_language(lang_code)
-            return True
+            old_lang = translator.current_language
+            
+            if lang_code == old_lang:
+                print(f"{EMOJI['INFO']} Already using {languages[lang_code]} / 已经在使用 {languages[lang_code]}")
+                logging.info(f"Language unchanged (already using {lang_code})")
+                return True
+                
+            if translator.set_language(lang_code):
+                print(f"{EMOJI['SUCCESS']} Language changed: {languages[old_lang]} -> {languages[lang_code]}")
+                print(f"{EMOJI['INFO']} Language settings saved to: settings.json")
+                logging.info(f"Language changed from {old_lang} to {lang_code}")
+                return True
     except (ValueError, IndexError):
         pass
     
     print(f"{Fore.RED}{EMOJI['ERROR']} {translator.get('menu.invalid_choice')}{Style.RESET_ALL}")
+    logging.warning("Invalid language selection")
     return False
 
 def select_browser():

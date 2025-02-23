@@ -29,15 +29,26 @@ EMOJI = {
 _translator = None
 
 def cleanup_chrome_processes(translator=None):
-    """Clean up all Chrome related processes / 清理所有Chrome相关进程"""
-    print("\nCleaning up Chrome processes... / 正在清理Chrome进程...")
+    """Clean up all browser related processes / 清理所有浏览器相关进程"""
+    print("\nCleaning up browser processes... / 正在清理浏览器进程...")
     try:
         if os.name == 'nt':  # Windows system / Windows系统
+            # Chrome cleanup / 清理Chrome进程
             os.system('taskkill /F /IM chrome.exe /T 2>nul')
             os.system('taskkill /F /IM chromedriver.exe /T 2>nul')
+            # Edge cleanup / 清理Edge进程
+            os.system('taskkill /F /IM msedge.exe /T 2>nul')
+            os.system('taskkill /F /IM msedgedriver.exe /T 2>nul')
+            # Brave cleanup / 清理Brave进程
+            os.system('taskkill /F /IM brave.exe /T 2>nul')
+            os.system('taskkill /F /IM bravedriver.exe /T 2>nul')
         else:  # Unix-like systems / 类Unix系统
             os.system('pkill -f chrome')
             os.system('pkill -f chromedriver')
+            os.system('pkill -f msedge')
+            os.system('pkill -f msedgedriver')
+            os.system('pkill -f brave')
+            os.system('pkill -f bravedriver')
     except Exception as e:
         if translator:
             print(f"{Fore.RED}{EMOJI['ERROR']} {translator.get('register.cleanup_error', error=str(e))}{Style.RESET_ALL}")
@@ -125,37 +136,25 @@ def setup_driver(translator=None):
     Set up browser driver
     设置浏览器驱动
     """
-    co = ChromiumOptions()
-    
-    # Use incognito mode / 使用无痕模式
-    co.set_argument("--incognito")
-    
-    # Set random port / 设置随机端口
-    co.auto_port()
-    
-    # Use headed mode (must be set to False for human simulation)
-    # 使用有头模式(一定要设置为False，模拟人类操作)
-    co.headless(False)
-    
     try:
-        # Load extension / 加载插件
-        extension_path = os.path.join(os.getcwd(), "turnstilePatch")
-        if os.path.exists(extension_path):
-            co.set_argument("--allow-extensions-in-incognito")
-            co.add_extension(extension_path)
+        # Use BrowserManager to create signup browser / 使用BrowserManager创建注册浏览器
+        from browser import BrowserManager
+        browser_manager = BrowserManager(translator=translator)
+        
+        if translator:
+            print(f"{Fore.CYAN}{EMOJI['START']} {translator.get('register.starting_browser')}{Style.RESET_ALL}")
+        else:
+            print("Starting browser... / 正在启动浏览器...")
+            
+        page = browser_manager.create_signup_browser()
+        return page
+        
     except Exception as e:
         if translator:
             print(f"{Fore.RED}{EMOJI['ERROR']} {translator.get('register.extension_load_error', error=str(e))}{Style.RESET_ALL}")
         else:
             print(f"Failed to load extension / 加载插件失败: {e}")
-    
-    if translator:
-        print(f"{Fore.CYAN}{EMOJI['START']} {translator.get('register.starting_browser')}{Style.RESET_ALL}")
-    else:
-        print("Starting browser... / 正在启动浏览器...")
-    page = ChromiumPage(co)
-    
-    return page
+        return None
 
 def handle_turnstile(page, translator=None):
     """
@@ -201,7 +200,7 @@ def handle_turnstile(page, translator=None):
                     # Random delay before clicking / 随机延时后点击验证
                     time.sleep(random.uniform(1, 3))
                     challenge_check.click()
-                    time.sleep(2)
+                    time.sleep(3)
 
                     # Check verification result / 检查验证结果
                     if check_verification_success(page, translator):
@@ -246,13 +245,6 @@ def check_verification_success(page, translator=None):
     检查验证是否成功
     """
     try:
-        # Check for subsequent form elements, indicating verification passed
-        # 检查是否存在后续表单元素，这表示验证已通过
-        if (page.ele("@name=password", timeout=0.5) or 
-            page.ele("@name=email", timeout=0.5) or
-            page.ele("@data-index=0", timeout=0.5) or
-            page.ele("Account Settings", timeout=0.5)):
-            return True
         
         # Check for error messages / 检查是否出现错误消息
         error_messages = [
@@ -265,6 +257,14 @@ def check_verification_success(page, translator=None):
             if page.ele(error_xpath):
                 return False
             
+        # Check for subsequent form elements, indicating verification passed
+        # 检查是否存在后续表单元素，这表示验证已通过
+        if (page.ele("@name=password", timeout=0.5) or 
+            page.ele("@name=email", timeout=0.5) or
+            page.ele("@data-index=0", timeout=0.5) or
+            page.ele("Account Settings", timeout=0.5)):
+            return True
+        
         return False
     except:
         return False
